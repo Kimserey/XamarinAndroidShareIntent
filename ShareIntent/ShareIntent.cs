@@ -1,45 +1,36 @@
 ﻿using System;
-
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace ShareIntent
 {
+	public interface IShare
+	{
+		void ShareFile(string path);
+	}
+
 	public class App : Application
 	{
 		public App()
 		{
-			// The root page of your application
+			var button = new Button { Text = "Share" };
+			button.Clicked += (sender, e) => {
+				DependencyService.Get<IShare>().ShareFile("somefile.txt");
+			};
+
 			var content = new ContentPage
 			{
-				Title = "ShareIntent",
+				Title = "Share intent test",
 				Content = new StackLayout
 				{
 					VerticalOptions = LayoutOptions.Center,
 					Children = {
-						new Label {
-							HorizontalTextAlignment = TextAlignment.Center,
-							Text = "Welcome to Xamarin Forms!"
-						}
+						button
 					}
 				}
 			};
 
 			MainPage = new NavigationPage(content);
-		}
-
-		protected override void OnStart()
-		{
-			// Handle when your app starts
-		}
-
-		protected override void OnSleep()
-		{
-			// Handle when your app sleeps
-		}
-
-		protected override void OnResume()
-		{
-			// Handle when your app resumes
 		}
 	}
 }
