@@ -6,21 +6,21 @@ namespace ShareIntent
 {
 	public interface IShare
 	{
-		void ShareFile(string path);
+		void ShareFile();
 	}
 
 	public class App : Application
 	{
 		public App()
 		{
-			var button = new Button { Text = "Share" };
+			var button = new Button { Text = "Backup your data" };
 			button.Clicked += (sender, e) => {
-				DependencyService.Get<IShare>().ShareFile("somefile.txt");
+				DependencyService.Get<IShare>().ShareFile();
 			};
 
 			var content = new ContentPage
 			{
-				Title = "Share intent test",
+				Title = "Backup db",
 				Content = new StackLayout
 				{
 					VerticalOptions = LayoutOptions.Center,
