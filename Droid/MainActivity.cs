@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using ShareIntent.Droid;
 using System.IO;
+using Android.Provider;
+using Android.Database;
 
 [assembly: Dependency(typeof(ShareImplementation))]
 namespace ShareIntent.Droid
@@ -125,9 +127,22 @@ namespace ShareIntent.Droid
 
 		protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
 		{
-			if (Picked != null)
-				Picked(this, new FilePicked { Exception = new FileNotFoundException() });
+			base.OnActivityResult(requestCode, resultCode, data);
 
+			if (requestCode != id || Picked == null)
+			{
+				Finish();
+				return;
+			}
+
+			if (resultCode == Result.Canceled)
+			{
+				Picked(this, new FilePicked { IsCancelled = true });
+				Finish();
+				return;
+			}
+
+			Picked(this, new FilePicked { Path = (new System.Uri(data.Data.ToString())).AbsolutePath });
 			Finish();
 		}
 	}
