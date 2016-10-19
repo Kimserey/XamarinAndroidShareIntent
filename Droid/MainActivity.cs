@@ -20,8 +20,7 @@ namespace ShareIntent.Droid
 		public void ShareFile()
 		{
 			// Creates app tmp folder
-			var backup = ".baskee_backup";
-			var backupDir = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, backup);
+			var backupDir = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, ".baskee_backup");
 			Directory.CreateDirectory(backupDir);
 
 			// Creates Share intent
