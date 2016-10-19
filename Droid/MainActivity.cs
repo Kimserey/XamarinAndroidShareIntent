@@ -43,6 +43,14 @@ namespace ShareIntent.Droid
 
 			Android.App.Application.Context.StartActivity(intent);
 		}
+
+		public void LoadFile()
+		{ 
+			Intent intent = new Intent(Intent.ActionGetContent);
+			intent.SetType("file/*");
+			intent.AddFlags(ActivityFlags.NewTask);
+			Android.App.Application.Context.StartActivity(intent);
+		}
 	}
 
 	[Activity(Label = "ShareIntent.Droid", Icon = "@drawable/icon", Theme = "@style/MyTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]

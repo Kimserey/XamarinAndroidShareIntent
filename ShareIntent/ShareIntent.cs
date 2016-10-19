@@ -7,15 +7,22 @@ namespace ShareIntent
 	public interface IShare
 	{
 		void ShareFile();
+		void LoadFile();
 	}
 
 	public class App : Application
 	{
 		public App()
 		{
-			var button = new Button { Text = "Backup your data" };
-			button.Clicked += (sender, e) => {
+			var saveBackup = new Button { Text = "Backup your data" };
+			saveBackup.Clicked += (sender, e) => {
 				DependencyService.Get<IShare>().ShareFile();
+			};
+
+			var loadBackup = new Button { Text = "Load backup file" };
+			loadBackup.Clicked += (sender, e) =>
+			{
+				DependencyService.Get<IShare>().LoadFile();
 			};
 
 			var content = new ContentPage
@@ -25,7 +32,8 @@ namespace ShareIntent
 				{
 					VerticalOptions = LayoutOptions.Center,
 					Children = {
-						button
+						saveBackup,
+						loadBackup
 					}
 				}
 			};
