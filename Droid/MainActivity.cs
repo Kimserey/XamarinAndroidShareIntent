@@ -19,8 +19,8 @@ namespace ShareIntent.Droid
 	{
 		public void ShareFile()
 		{
-			// Creates app tmp folder
-			var backupDir = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, ".baskee_backup");
+			// Creates app backup folder
+			var backupDir = Path.Combine(Android.App.Application.Context.GetExternalFilesDir(null).AbsolutePath, "backup");
 			Directory.CreateDirectory(backupDir);
 
 			// Creates Share intent
@@ -30,12 +30,12 @@ namespace ShareIntent.Droid
 
 			// Adds Subject and Text description
 			var date = DateTime.UtcNow;
-			var backupName = "baskee_" + DateTime.UtcNow.ToString("yyyyMMdd__hhmmss") + ".baskee";
+			var backupName = DateTime.UtcNow.ToString("yyyyMMdd_hhmmss") + ".baskee";
 			intent.PutExtra(Intent.ExtraSubject, "Baskee backup - " + date.ToLongDateString());
 			intent.PutExtra(Intent.ExtraText, String.Format("Baskee backup file from {0}.", date.ToLongDateString()));
 
 			// Attaches backup file
-			var source = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "test.txt");
+			var source = Path.Combine(Android.App.Application.Context.FilesDir.AbsolutePath, "test.txt");
 			var destination = Path.Combine(backupDir, backupName);
 			File.Copy(source, destination, true);
 			var file = new Java.IO.File(destination);
