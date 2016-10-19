@@ -15,8 +15,20 @@ using System.IO;
 [assembly: Dependency(typeof(ShareImplementation))]
 namespace ShareIntent.Droid
 {
+	public class FilePicked : EventArgs
+	{
+		public string Path { get; set; }
+		public bool IsCancelled { get; set; }
+		public Exception Exception { get; set; }
+	}
+
 	public class ShareImplementation : IShare
 	{
+		public ShareImplementation()
+		{
+
+		}
+
 		public void ShareFile()
 		{
 			// Creates app backup folder
@@ -44,12 +56,80 @@ namespace ShareIntent.Droid
 			Android.App.Application.Context.StartActivity(intent);
 		}
 
-		public void LoadFile()
+		TaskCompletionSource<string> completionSource;
+		int id;
+
+		// Creates a unique Id which will be used
+		// to identify the picking intent.
+		// We must ensure that there will be only one pick intent 
+		// at a time otherwise it will yield very strange behaviours.
+		int NextId()
+		{
+			int i = id;
+			if (id == Int32.MaxValue) id = 0;
+			else id++;
+			return i;
+		}
+
+		public Task<string> LoadFile()
 		{ 
-			Intent intent = new Intent(Intent.ActionGetContent);
-			intent.SetType("file/*");
-			intent.AddFlags(ActivityFlags.NewTask);
+			var next = new TaskCompletionSource<string>(NextId());
+
+			EventHandler<FilePicked> handler = null;
+
+			handler = (sender, e) =>
+			{
+				// Threadsafe way to replace "completionSource" by null
+				var tcs = Interlocked.Exchange(ref completionSource, null);
+
+				PickFileActivity.Picked -= handler;
+
+				if (String.IsNullOrWhiteSpace(e.Path))
+					tcs.SetResult(e.Path);
+				else if (e.Exception != null)
+					tcs.SetException(e.Exception);
+			};
+
+			PickFileActivity.Picked += handler;
+
+			var intent = new Intent(Android.App.Application.Context, typeof(PickFileActivity));
+			intent.PutExtra(PickFileActivity.ExtraId, id);
+			intent.SetFlags(ActivityFlags.NewTask);
 			Android.App.Application.Context.StartActivity(intent);
+
+			// Threadsafe way to compare "completionSource" to "null" and replace "completionSource" with "next" if equal
+			if (Interlocked.CompareExchange(ref completionSource, next, null) != null)
+				throw new InvalidOperationException("Another task is already started.");
+
+			return completionSource.Task;
+		}
+	}
+
+	[Activity]
+	public class PickFileActivity : Activity
+	{
+		internal const string ExtraId = "id";
+		internal static event EventHandler<FilePicked> Picked;
+		int id;
+
+		protected override void OnCreate(Bundle savedInstanceState)
+		{
+			base.OnCreate(savedInstanceState);
+			var bundle = savedInstanceState ?? this.Intent.Extras;
+			id = bundle.GetInt(ExtraId);
+
+			var intent = new Intent(Intent.ActionGetContent);
+			intent.SetType("file/*");
+			StartActivityForResult(intent, id);
+		}
+
+		protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+		{
+			if (Picked != null)
+				Picked(this, new FilePicked { Exception = new FileNotFoundException() });
+
+			Picked(this, new FilePicked { Exception = new Exception() });
+			Finish();
 		}
 	}
 

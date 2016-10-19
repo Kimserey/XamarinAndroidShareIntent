@@ -7,7 +7,7 @@ namespace ShareIntent
 	public interface IShare
 	{
 		void ShareFile();
-		void LoadFile();
+		Task<string> LoadFile();
 	}
 
 	public class App : Application
