@@ -128,7 +128,6 @@ namespace ShareIntent.Droid
 			if (Picked != null)
 				Picked(this, new FilePicked { Exception = new FileNotFoundException() });
 
-			Picked(this, new FilePicked { Exception = new Exception() });
 			Finish();
 		}
 	}
