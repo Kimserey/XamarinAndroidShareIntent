@@ -20,7 +20,7 @@ namespace ShareIntent.Droid
 		public void ShareFile()
 		{
 			// Creates app backup folder
-			var backupDir = Path.Combine(Android.App.Application.Context.GetExternalFilesDir(null).AbsolutePath, "backup");
+			var backupDir = Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, "Baskee", "Backups");
 			Directory.CreateDirectory(backupDir);
 
 			// Creates Share intent
