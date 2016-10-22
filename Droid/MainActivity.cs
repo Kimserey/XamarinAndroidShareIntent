@@ -17,6 +17,7 @@ using Android.Database;
 [assembly: Dependency(typeof(ShareImplementation))]
 namespace ShareIntent.Droid
 {
+
 	public class FilePicked : EventArgs
 	{
 		public string Path { get; set; }
@@ -26,11 +27,6 @@ namespace ShareIntent.Droid
 
 	public class ShareImplementation : IShare
 	{
-		public ShareImplementation()
-		{
-
-		}
-
 		public void ShareFile()
 		{
 			// Creates app backup folder
@@ -39,7 +35,7 @@ namespace ShareIntent.Droid
 
 			// Creates Share intent
 			var intent = new Intent(Intent.ActionSend);
-			intent.SetType("*/*");
+			intent.SetType("file/*");
 			intent.AddFlags(ActivityFlags.NewTask);
 
 			// Adds Subject and Text description
@@ -49,7 +45,7 @@ namespace ShareIntent.Droid
 			intent.PutExtra(Intent.ExtraText, String.Format("Baskee backup file from {0}.", date.ToLongDateString()));
 
 			// Attaches backup file
-			var source = Path.Combine(Android.App.Application.Context.FilesDir.AbsolutePath, "test.txt");
+			var source = Path.Combine(Android.App.Application.Context.FilesDir.AbsolutePath, "data.db");
 			var destination = Path.Combine(backupDir, backupName);
 			File.Copy(source, destination, true);
 			var file = new Java.IO.File(destination);
@@ -76,7 +72,6 @@ namespace ShareIntent.Droid
 		public Task<string> LoadFile()
 		{ 
 			var next = new TaskCompletionSource<string>(NextId());
-
 			EventHandler<FilePicked> handler = null;
 
 			handler = (sender, e) =>
@@ -86,8 +81,10 @@ namespace ShareIntent.Droid
 
 				PickFileActivity.Picked -= handler;
 
-				if (String.IsNullOrWhiteSpace(e.Path))
+				if (!String.IsNullOrWhiteSpace(e.Path))
 					tcs.SetResult(e.Path);
+				else if (e.IsCancelled)
+					tcs.SetResult(null);
 				else if (e.Exception != null)
 					tcs.SetException(e.Exception);
 			};
@@ -158,6 +155,7 @@ namespace ShareIntent.Droid
 			base.OnCreate(bundle);
 
 			global::Xamarin.Forms.Forms.Init(this, bundle);
+
 
 			LoadApplication(new App());
 		}
