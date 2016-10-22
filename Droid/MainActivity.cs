@@ -13,10 +13,29 @@ using ShareIntent.Droid;
 using System.IO;
 using Android.Provider;
 using Android.Database;
+using Android.Support.Design.Widget;
 
+[assembly: Dependency(typeof(NotificationImplementation))]
 [assembly: Dependency(typeof(ShareImplementation))]
 namespace ShareIntent.Droid
 {
+	public class NotificationImplementation : INotification
+	{
+		public void Notify(
+				string message, 
+				int duration = 3000, 
+				string actionText = null, 
+				Action<object> action = null)
+		{
+			var view = ((Activity)Forms.Context).FindViewById(Android.Resource.Id.Content);
+			var snack = Snackbar.Make(view, message, duration);
+
+			if (actionText != null && action != null)
+				snack.SetAction(actionText, action);
+	
+			snack.Show();
+		}
+	}
 
 	public class FilePicked : EventArgs
 	{
@@ -27,6 +46,13 @@ namespace ShareIntent.Droid
 
 	public class ShareImplementation : IShare
 	{
+		public ShareImplementation()
+		{
+			// Creates test file
+			var source = Path.Combine(Android.App.Application.Context.FilesDir.AbsolutePath, "test.txt");
+			File.WriteAllText(source, "Test file");
+		}
+
 		public void ShareFile()
 		{
 			// Creates app backup folder
@@ -45,7 +71,7 @@ namespace ShareIntent.Droid
 			intent.PutExtra(Intent.ExtraText, String.Format("Baskee backup file from {0}.", date.ToLongDateString()));
 
 			// Attaches backup file
-			var source = Path.Combine(Android.App.Application.Context.FilesDir.AbsolutePath, "data.db");
+			var source = Path.Combine(Android.App.Application.Context.FilesDir.AbsolutePath, "test.txt");
 			var destination = Path.Combine(backupDir, backupName);
 			File.Copy(source, destination, true);
 			var file = new Java.IO.File(destination);

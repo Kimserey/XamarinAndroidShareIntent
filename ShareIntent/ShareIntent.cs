@@ -11,6 +11,15 @@ namespace ShareIntent
 		Task<string> LoadFile();
 	}
 
+	public interface INotification
+	{
+		void Notify(
+			string message,
+			int duration = 3000,
+			string actionText = null,
+			Action<object> action = null);
+	}
+
 	public class App : Application
 	{
 		public App()
@@ -20,6 +29,9 @@ namespace ShareIntent
 			var saveBackup = new Button { Text = "Backup your data" };
 			saveBackup.Clicked += (sender, e) => {
 				DependencyService.Get<IShare>().ShareFile();
+				DependencyService
+					.Get<INotification>()
+					.Notify("Your data were backed up successfuly! :)");
 			};
 
 			var loadBackup = new Button { Text = "Load backup file" };
@@ -27,6 +39,17 @@ namespace ShareIntent
 			{
 				var text = await DependencyService.Get<IShare>().LoadFile();
 				label.Text = text;
+				DependencyService
+					.Get<INotification>()
+					.Notify(
+						"Your file was successfuly loaded! :)",
+						actionText: "Undo",
+						action: (obj) => { label.Text = ""; });
+			};
+
+			var snack = new Button { Text = "Snack" };
+			snack.Clicked += (sender, e) => { 
+				DependencyService.Get<INotification>().Notify("Snack!");
 			};
 
 			var content = new ContentPage
@@ -37,6 +60,7 @@ namespace ShareIntent
 					VerticalOptions = LayoutOptions.Center,
 					Children = {
 						label,
+						snack,
 						saveBackup,
 						loadBackup
 					}
