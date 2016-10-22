@@ -9,3 +9,5 @@ This is a sample showing how to share a file from a Xamarin.Forms application us
 ![gdrive](https://github.com/Kimserey/XamarinAndroidShareIntent/blob/master/img/3.png?raw=true)
 
 ## Snackbar sample
+
+![snack](https://raw.githubusercontent.com/Kimserey/XamarinAndroidShareIntent/master/img/snack.png)
